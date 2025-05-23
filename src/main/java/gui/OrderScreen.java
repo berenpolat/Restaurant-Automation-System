@@ -8,6 +8,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 
 
 public class OrderScreen extends JFrame {
@@ -17,6 +18,8 @@ public class OrderScreen extends JFrame {
 
     private OrderManager orderManager;
     private Inventory inventory;
+
+    private String order;
     public OrderScreen(OrderManager orderManager, Inventory inventory) {
         this.orderManager = orderManager;
         this.inventory = inventory;
@@ -39,15 +42,7 @@ public class OrderScreen extends JFrame {
         form.add(qtyField);
 
         JButton submit = new JButton("Add Order");
-        submit.addActionListener(e -> {
-            String order = "Table " + tableField.getText() + ": " +
-                qtyField.getText() + " x " + itemField.getText();
-            orders.add(order);
-            outputArea.setText(String.join("\n", orders));
-            tableField.setText("");
-            itemField.setText("");
-            qtyField.setText("");
-        });
+
 
         outputArea = new JTextArea();
         outputArea.setEditable(false);
@@ -58,24 +53,46 @@ public class OrderScreen extends JFrame {
 
         submit.addActionListener(e -> {
             try {
-                String item = itemField.getText();
-                int qty = Integer.parseInt(qtyField.getText());
-                int table = Integer.parseInt(tableField.getText());
-                double price = 10.0; // sabit fiyat, istersen menüden çekilebilir
+                String item = itemField.getText().trim();
+                int qty = Integer.parseInt(qtyField.getText().trim());
+                int table = Integer.parseInt(tableField.getText().trim());
+                double price = 10.0;
 
-                if (inventory.isAvailable(item, qty)) {
+                // 1. Malzeme kontrolü
+                Map<String, Integer> ingredients = RecipeDAO.getIngredientsForDish(item);
+                boolean allAvailable = true;
+
+                for (String ingredient : ingredients.keySet()) {
+                    int totalQty = ingredients.get(ingredient) * qty;
+                    if (!InventoryDAO.isAvailable(ingredient, totalQty)) {
+                        allAvailable = false;
+                        break;
+                    }
+                }
+
+                if (allAvailable) {
+                    // 2. Siparişi oluştur
                     OrderItem orderItem = new OrderItem(item, qty, price);
                     Order order = new Order(table, Arrays.asList(orderItem));
                     orderManager.addOrder(order);
-                    OrderDAO.saveOrder(order); // DB'ye de kaydet
-                    InventoryDAO.deduct(item, qty);
+                    OrderDAO.saveOrder(order);
+
+                    // 3. Malzemeleri stoktan düş
+                    for (String ingredient : ingredients.keySet()) {
+                        int totalQty = ingredients.get(ingredient) * qty;
+                        InventoryDAO.deduct(ingredient, totalQty);
+                    }
+
+                    outputArea.setText(orderItem.toString() + "\n");
 
 
+                    outputArea.setText(String.join("\n", orders));
+                    tableField.setText("");
+                    itemField.setText("");
+                    qtyField.setText("");
 
-
-                    outputArea.append(orderItem.toString() + "\n");
                 } else {
-                    JOptionPane.showMessageDialog(this, "Not enough stock!");
+                    JOptionPane.showMessageDialog(this, "Yetersiz stok: Yemekteki malzemeler eksik!");
                 }
 
                 tableField.setText("");
@@ -86,6 +103,7 @@ public class OrderScreen extends JFrame {
                 JOptionPane.showMessageDialog(this, "Invalid input!");
             }
         });
+
 
 
         setVisible(true);

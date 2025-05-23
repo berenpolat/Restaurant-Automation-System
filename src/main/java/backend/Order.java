@@ -22,4 +22,12 @@ public class Order {
     public double getTotal() {
         return items.stream().mapToDouble(OrderItem::getTotalPrice).sum();
     }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+            "tableNo=" + tableNo +
+            ", items=" + items +
+            '}';
+    }
 }
