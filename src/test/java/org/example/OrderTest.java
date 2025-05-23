@@ -15,4 +15,18 @@ public class OrderTest {
 
         assertEquals(12.5, order.getTotalAmount(), 0.01);
     }
+    @Test
+    public void testOrderCreation() {
+        Order order = new Order("Table 1", new Date());
+        assertEquals("Table 1", order.getTableName());
+        assertNotNull(order.getDate());
+    }
+
+    @Test
+    public void testAddItem() {
+        Order order = new Order("Table 2", new Date());
+        MenuItem item = new MenuItem("Pizza", 12.0);
+        order.addItem(item, 2);
+        assertEquals(24.0, order.getTotalPrice());
+    }
 }
