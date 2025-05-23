@@ -3,6 +3,9 @@ package org.example;
 import backend.Order;
 import backend.OrderItem;
 import org.junit.Test;
+
+import java.awt.*;
+
 import static org.junit.Assert.*;
 
 public class OrderTest {
