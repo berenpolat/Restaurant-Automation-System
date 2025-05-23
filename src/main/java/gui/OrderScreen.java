@@ -1,6 +1,6 @@
 package gui;
 
-import org.example.backend.Order;
+import backend.Order;
 import backend.OrderManager;
 
 import javax.swing.*;
