@@ -2,9 +2,9 @@ package gui;
 
 import javax.swing.*;
 
-public class ReportScreen extends JFrame {
-    public ReportScreen() {
-        setTitle("Report");
+public class ViewMenu extends JFrame {
+    public ViewMenu() {
+        setTitle("View Menu");
         setSize(400, 300);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
