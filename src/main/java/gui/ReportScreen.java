@@ -1,8 +1,8 @@
-package org.example.gui;
+package gui;
 
 
-import org.example.backend.OrderManager;
-import org.example.backend.ReportGenerator;
+import backend.OrderManager;
+import backend.ReportGenerator;
 
 import javax.swing.*;
 import java.awt.*;

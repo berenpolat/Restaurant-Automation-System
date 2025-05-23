@@ -1,7 +1,7 @@
-package org.example.gui;
+package gui;
 
 import org.example.backend.Order;
-import org.example.backend.OrderManager;
+import backend.OrderManager;
 
 import javax.swing.*;
 import java.awt.*;
