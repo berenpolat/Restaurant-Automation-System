@@ -1,7 +1,13 @@
 package backend;
 
+import java.sql.*;
+
 public class DatabaseManager {
-    public static void connect() {
-        System.out.println("Connected to DB (simulated)");
+    private static final String URL = "jdbc:mysql://localhost:3306/restaurant";
+    private static final String USER = "root";
+    private static final String PASS = "677610Ay";
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASS);
     }
 }

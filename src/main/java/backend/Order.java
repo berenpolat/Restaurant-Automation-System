@@ -3,19 +3,23 @@ package backend;
 import java.util.List;
 
 public class Order {
-    private int id;
+    private int tableNo;
     private List<OrderItem> items;
 
-    public Order(int id, List<OrderItem> items) {
-        this.id = id;
+    public Order(int tableNo, List<OrderItem> items) {
+        this.tableNo = tableNo;
         this.items = items;
     }
 
-    public int getId() {
-        return id;
+    public int getTableNo() {
+        return tableNo;
     }
 
     public List<OrderItem> getItems() {
         return items;
+    }
+
+    public double getTotal() {
+        return items.stream().mapToDouble(OrderItem::getTotalPrice).sum();
     }
 }

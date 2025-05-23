@@ -1,11 +1,28 @@
 package backend;
 
+import java.util.HashMap;
+
 public class Inventory {
-    public boolean checkAvailability(String itemName, int qty) {
-        return true;
+    private HashMap<String, Integer> stock = new HashMap<>();
+
+    public Inventory() {
+        stock.put("Tomatoes", 50);
+        stock.put("Lettuce", 30);
+        stock.put("Cheese", 12);
+        stock.put("Onions", 20);
     }
 
-    public void deduct(String itemName, int qty) {
-        // simulate deduction
+    public boolean isAvailable(String item, int quantity) {
+        return stock.getOrDefault(item, 0) >= quantity;
+    }
+
+    public void deduct(String item, int quantity) {
+        if (isAvailable(item, quantity)) {
+            stock.put(item, stock.get(item) - quantity);
+        }
+    }
+
+    public HashMap<String, Integer> getStock() {
+        return stock;
     }
 }

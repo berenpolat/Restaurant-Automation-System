@@ -1,5 +1,7 @@
+import gui.LoginScreen;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Restaurant Automation System Running...");
+        new LoginScreen();
     }
 }

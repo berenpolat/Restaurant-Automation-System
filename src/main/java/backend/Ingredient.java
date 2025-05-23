@@ -1,6 +1,14 @@
 package backend;
 
 public class Ingredient {
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public String getName() {
+        return name;
+    }
+
     private String name;
     private int quantity;
 
