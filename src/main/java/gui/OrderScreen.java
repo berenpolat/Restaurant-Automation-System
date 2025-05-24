@@ -20,6 +20,8 @@ public class OrderScreen extends JFrame {
     private OrderManager orderManager;
     private Inventory inventory;
 
+    private OrderItem orderItem;
+
     private String order;
     public OrderScreen(OrderManager orderManager, Inventory inventory) {
         this.orderManager = orderManager;
@@ -76,7 +78,7 @@ public class OrderScreen extends JFrame {
                 String item = itemBox.getSelectedItem().toString();
                 int qty = Integer.parseInt(qtyField.getText().trim());
                 int table = Integer.parseInt(tableField.getText().trim());
-                double price = 10.0;
+
 
                 // 1. Malzeme kontrolü
                 Map<String, Integer> ingredients = RecipeDAO.getIngredientsForDish(item);
@@ -91,8 +93,22 @@ public class OrderScreen extends JFrame {
                 }
 
                 if (allAvailable) {
+
                     // 2. Siparişi oluştur
-                    OrderItem orderItem = new OrderItem(item, qty, price);
+
+                    String selectedItem = itemBox.getSelectedItem().toString();
+                    double price = 0.0;
+
+                    for (MenuItem menuItem : MenuDAO.fetchMenuItems()) {
+                        if (menuItem.getName().equals(selectedItem)) {
+                            price = menuItem.getPrice();
+                            break;
+                        }
+                    }
+
+                    orderItem = new OrderItem(item, qty, price);
+
+
                     Order order = new Order(table, Arrays.asList(orderItem));
                     orderManager.addOrder(order);
                     OrderDAO.saveOrder(order);
