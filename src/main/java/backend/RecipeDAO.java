@@ -30,9 +30,13 @@ public class RecipeDAO {
       ps.setString(2, ingredient);
       ps.setInt(3, quantity);
       ps.executeUpdate();
-    } catch (SQLException e) {
-      e.printStackTrace();
+
     }
+    catch (SQLException e) {
+      e.printStackTrace();
+
+    }
+
   }
 
 }
