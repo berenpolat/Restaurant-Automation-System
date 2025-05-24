@@ -5,73 +5,84 @@ import backend.MenuItem;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Arrays;
-import java.util.Map;
-
 
 public class OrderScreen extends JFrame {
-    private JTextField tableField, itemField, qtyField;
-    private JTextArea outputArea;
-    private List<String> orders = new ArrayList<>();
+    private final JTextField tableField = new JTextField(15);
+    private final JTextField qtyField = new JTextField(15);
+    private final JTextArea outputArea = new JTextArea();
+    private final List<String> orders = new ArrayList<>();
+    private final OrderManager orderManager;
+    private final Inventory inventory;
 
-    private OrderManager orderManager;
-    private Inventory inventory;
-
-    private OrderItem orderItem;
-
-    private String order;
     public OrderScreen(OrderManager orderManager, Inventory inventory) {
         this.orderManager = orderManager;
         this.inventory = inventory;
-        setTitle("Create Order");
-        setSize(400, 400);
+
+        setTitle("📝 Create Order");
+        setSize(480, 360);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
-        Color background = new Color(245, 245, 245);
+        Color background = new Color(250, 250, 250);
         Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
 
-        JPanel form = new JPanel(new GridLayout(3, 2));
-        form.setBackground(background);
-        form.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(background);
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        form.add(new JLabel("Table No:"));
-        tableField = new JTextField();
-        form.add(tableField);
+        JLabel tableLabel = new JLabel("Table No:");
+        tableLabel.setFont(labelFont);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        formPanel.add(tableLabel, gbc);
 
-        form.add(new JLabel("Item:"));
+        gbc.gridx = 1;
+        formPanel.add(tableField, gbc);
+
+        JLabel itemLabel = new JLabel("Item:");
+        itemLabel.setFont(labelFont);
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        formPanel.add(itemLabel, gbc);
+
         JComboBox<String> itemBox = new JComboBox<>();
         for (MenuItem menuItem : MenuDAO.fetchMenuItems()) {
             itemBox.addItem(menuItem.getName());
         }
-        form.add(itemBox);
+        gbc.gridx = 1;
+        formPanel.add(itemBox, gbc);
 
-        form.add(new JLabel("Quantity:"));
-        qtyField = new JTextField();
-        form.add(qtyField);
+        JLabel qtyLabel = new JLabel("Quantity:");
+        qtyLabel.setFont(labelFont);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        formPanel.add(qtyLabel, gbc);
+
+        gbc.gridx = 1;
+        formPanel.add(qtyField, gbc);
 
         JButton submit = new JButton("Add Order");
         submit.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        submit.setBackground(new Color(64, 64, 64));
+        submit.setBackground(new Color(60, 130, 200));
         submit.setForeground(Color.WHITE);
         submit.setFocusPainted(false);
-        submit.setPreferredSize(new Dimension(120, 35));
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setBackground(background);
-        buttonPanel.add(submit);
-        add(buttonPanel, BorderLayout.CENTER);
+        submit.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        submit.setPreferredSize(new Dimension(140, 40));
 
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        formPanel.add(submit, gbc);
 
-        outputArea = new JTextArea();
-        outputArea.setEditable(false);
-
-
-        add(form, BorderLayout.NORTH);
-       // add(submit, BorderLayout.CENTER);
-        add(new JScrollPane(outputArea), BorderLayout.SOUTH);
+        add(formPanel, BorderLayout.CENTER);
 
         submit.addActionListener(e -> {
             try {
@@ -79,11 +90,8 @@ public class OrderScreen extends JFrame {
                 int qty = Integer.parseInt(qtyField.getText().trim());
                 int table = Integer.parseInt(tableField.getText().trim());
 
-
-                // 1. Malzeme kontrolü
                 Map<String, Integer> ingredients = RecipeDAO.getIngredientsForDish(item);
                 boolean allAvailable = true;
-
                 for (String ingredient : ingredients.keySet()) {
                     int totalQty = ingredients.get(ingredient) * qty;
                     if (!InventoryDAO.isAvailable(ingredient, totalQty)) {
@@ -93,53 +101,35 @@ public class OrderScreen extends JFrame {
                 }
 
                 if (allAvailable) {
-
-                    // 2. Siparişi oluştur
-
-                    String selectedItem = itemBox.getSelectedItem().toString();
                     double price = 0.0;
-
                     for (MenuItem menuItem : MenuDAO.fetchMenuItems()) {
-                        if (menuItem.getName().equals(selectedItem)) {
+                        if (menuItem.getName().equals(item)) {
                             price = menuItem.getPrice();
                             break;
                         }
                     }
 
-                    orderItem = new OrderItem(item, qty, price);
-
-
-                    Order order = new Order(table, Arrays.asList(orderItem));
+                    OrderItem orderItem = new OrderItem(item, qty, price);
+                    Order order = new Order(table, Collections.singletonList(orderItem));
                     orderManager.addOrder(order);
                     OrderDAO.saveOrder(order);
 
-                    // 3. Malzemeleri stoktan düş
                     for (String ingredient : ingredients.keySet()) {
                         int totalQty = ingredients.get(ingredient) * qty;
                         InventoryDAO.deduct(ingredient, totalQty);
                     }
 
-                    outputArea.setText(orderItem.toString() + "\n");
-
-
-                    outputArea.setText(String.join("\n", orders));
+                    JOptionPane.showMessageDialog(this, "✔ Order placed:\n" + orderItem.toString());
                     tableField.setText("");
                     qtyField.setText("");
-                    JOptionPane.showMessageDialog(this, "Sipariş başarıyla eklendi!");
-
                 } else {
-                    JOptionPane.showMessageDialog(this, "Yetersiz stok: Yemekteki malzemeler eksik!");
+                    JOptionPane.showMessageDialog(this, "❗ Not enough stock for: " + item);
                 }
 
-                tableField.setText("");
-                qtyField.setText("");
-
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid input!");
+                JOptionPane.showMessageDialog(this, "⚠ Invalid input!");
             }
         });
-
-
 
         setVisible(true);
     }

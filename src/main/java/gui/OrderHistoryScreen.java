@@ -11,13 +11,21 @@ import java.sql.*;
 public class OrderHistoryScreen extends JFrame {
   public OrderHistoryScreen() {
     setTitle("Order History");
-    setSize(600, 400);
+    setSize(700, 400);
+    setLocationRelativeTo(null);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    setLayout(new BorderLayout());
+    setLayout(new BorderLayout(10, 10));
+    getContentPane().setBackground(new Color(250, 250, 250));
     String[] columnNames = {"Order ID", "Items", "Total"};
     DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
     JTable table = new JTable(tableModel);
-    table.setRowHeight(28);
+    table.setRowHeight(30);
+    table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+    table.setEnabled(false);
+
+    table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 14));
+    table.getTableHeader().setBackground(new Color(240, 240, 240));
+    table.getTableHeader().setBorder(BorderFactory.createLineBorder(Color.BLUE));
 
     try (Connection conn = DatabaseManager.getConnection()) {
       String query =
@@ -47,11 +55,13 @@ public class OrderHistoryScreen extends JFrame {
       e.printStackTrace();
     }
 
+    // Renkli total hücre render'ı
     table.getColumnModel().getColumn(2).setCellRenderer(new PriceCellRenderer());
 
     JScrollPane scrollPane = new JScrollPane(table);
+    scrollPane.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
     add(scrollPane, BorderLayout.CENTER);
-    setLocationRelativeTo(null);
+
     setVisible(true);
   }
 
@@ -62,14 +72,11 @@ public class OrderHistoryScreen extends JFrame {
         double price = ((Number) value).doubleValue();
         setText(String.format("$%.2f", price));
         setHorizontalAlignment(SwingConstants.RIGHT);
-        setForeground(price > 25.0 ? Color.RED : new Color(0, 128, 0));
+        setForeground(price > 25.0 ? new Color(200, 0, 0) : new Color(0, 150, 0));
+        setFont(new Font("Segoe UI", Font.BOLD, 14));
       } else {
         setText(value != null ? value.toString() : "");
       }
     }
   }
 }
-
-
-
-

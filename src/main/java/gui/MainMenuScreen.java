@@ -1,59 +1,68 @@
 package gui;
 
-import backend.Inventory;
-import backend.OrderManager;
-import backend.User;
+import backend.*;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class MainMenuScreen extends JFrame {
-    private OrderManager orderManager = new OrderManager();
-    private Inventory inventory = new Inventory();
-
-    private User user;
+    private final OrderManager orderManager = new OrderManager();
+    private final Inventory inventory = new Inventory();
+    private final User user;
 
     public MainMenuScreen(User user) {
         this.user = user;
 
         setTitle("Main Menu - " + user.getUsername() + " (" + user.getRole() + ")");
-        setSize(400, 400);
+        setSize(450, 550);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new GridLayout(0, 1)); // Otomatik satır
 
-        JLabel welcomeLabel = new JLabel("Welcome, " + user.getUsername() + "!");
-        welcomeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        add(welcomeLabel);
+        JPanel panel = new JPanel();
+        panel.setBackground(new Color(248, 248, 248));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        JButton orderButton = new JButton("Create Order");
-        JButton menuButton = new JButton("View Menu");
+        JLabel welcomeLabel = new JLabel("Welcome, " + user.getUsername() + "!", SwingConstants.CENTER);
+        welcomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        welcomeLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 20, 0));
+        panel.add(welcomeLabel);
 
-        orderButton.addActionListener(e -> new OrderScreen(orderManager, inventory));
-        menuButton.addActionListener(e -> new ViewMenu());
-
-        add(orderButton);
-        add(menuButton);
+        panel.add(createStyledButton("Create Order", () -> new OrderScreen(orderManager, inventory)));
+        panel.add(createStyledButton("View Menu", ViewMenu::new));
 
         if (user.getRole().equals("admin")) {
-            JButton inventoryButton = new JButton("Inventory");
-            JButton reportButton = new JButton("Reports");
-            JButton historyButton = new JButton("Order History");
-            JButton addMenuButton = new JButton("Add Menu Item");
-            JButton editInventoryButton = new JButton("Edit Inventory");
-
-            inventoryButton.addActionListener(e -> new InventoryScreen());
-            reportButton.addActionListener(e -> new ReportScreen(orderManager));
-            historyButton.addActionListener(e -> new OrderHistoryScreen());
-            addMenuButton.addActionListener(e -> new MenuAddScreen());
-            editInventoryButton.addActionListener(e -> new InventoryEditScreen());
-
-            add(inventoryButton);
-            add(reportButton);
-            add(historyButton);
-            add(addMenuButton);
-            add(editInventoryButton);
+            panel.add(createStyledButton("Inventory", InventoryScreen::new));
+            panel.add(createStyledButton("Reports", () -> new ReportScreen(orderManager)));
+            panel.add(createStyledButton("Order History", OrderHistoryScreen::new));
+            panel.add(createStyledButton("Add Menu Item", MenuAddScreen::new));
+            panel.add(createStyledButton("Edit Inventory", InventoryEditScreen::new));
         }
 
+        add(panel);
         setVisible(true);
+    }
+
+    private JPanel createStyledButton(String text, Runnable action) {
+        JButton btn = new JButton(text);
+        btn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(200, 40));
+        btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        btn.setBackground(new Color(60, 130, 200));
+        btn.setForeground(Color.WHITE);
+        btn.setFocusPainted(false);
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        btn.addActionListener(e -> action.run());
+        btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.setOpaque(false);
+        wrapper.add(Box.createVerticalStrut(8));
+        wrapper.add(btn);
+        wrapper.add(Box.createVerticalStrut(8));
+
+        return wrapper;
     }
 }
