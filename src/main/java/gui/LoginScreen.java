@@ -1,6 +1,6 @@
 package gui;
-
 import backend.User;
+import backend.UserDAO;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,41 +11,52 @@ public class LoginScreen extends JFrame {
     private JPasswordField passwordField;
 
     public LoginScreen() {
-        setTitle("Login");
-        setSize(300, 150);
+        setTitle("Restaurant Automation Login");
+        setSize(400, 250);
+        setLocationRelativeTo(null); // ortala
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setLayout(new GridLayout(3, 2));
+        setLayout(new BorderLayout());
 
-        add(new JLabel("Username:"));
+        JLabel titleLabel = new JLabel("Welcome to Restaurant Automation", JLabel.CENTER);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        add(titleLabel, BorderLayout.NORTH);
+
+        JPanel formPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 50, 10, 50));
+        formPanel.add(new JLabel("Username:"));
         usernameField = new JTextField();
-        add(usernameField);
+        formPanel.add(usernameField);
 
-        add(new JLabel("Password:"));
+        formPanel.add(new JLabel("Password:"));
         passwordField = new JPasswordField();
-        add(passwordField);
+        formPanel.add(passwordField);
+
+        add(formPanel, BorderLayout.CENTER);
 
         JButton loginButton = new JButton("Login");
-        add(loginButton);
+        loginButton.setBackground(new Color(211, 211, 211));
+        loginButton.setForeground(Color.WHITE);
+        loginButton.setFocusPainted(false);
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
-        loginButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String user = usernameField.getText();
-                String pass = new String(passwordField.getPassword());
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(loginButton);
+        add(buttonPanel, BorderLayout.SOUTH);
 
-                User loggedInUser = null;
+        // Login logic
+        loginButton.addActionListener(e -> {
+            String user = usernameField.getText().trim();
+            String pass = new String(passwordField.getPassword()).trim();
 
-                if (user.equals("admin") && pass.equals("admin")) {
-                    loggedInUser = new User("admin", "admin");
-                } else if (user.equals("garson") && pass.equals("1234")) {
-                    loggedInUser = new User("garson", "garson");
-                }
 
-                if (loggedInUser != null) {
-                    dispose();
-                    new MainMenuScreen(loggedInUser);
-                } else {
-                    JOptionPane.showMessageDialog(null, "Invalid credentials");
-                }
+            User loggedIn = UserDAO.authenticate(user, pass);
+
+            if (loggedIn != null) {
+                dispose();
+                new MainMenuScreen(loggedIn);
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid credentials!", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
 

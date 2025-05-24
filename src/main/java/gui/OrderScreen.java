@@ -1,6 +1,7 @@
 package gui;
 
 import backend.*;
+import backend.MenuItem;
 
 import javax.swing.*;
 import java.awt.*;
@@ -24,36 +25,55 @@ public class OrderScreen extends JFrame {
         this.orderManager = orderManager;
         this.inventory = inventory;
         setTitle("Create Order");
-        setSize(400, 300);
+        setSize(400, 400);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
+        Color background = new Color(245, 245, 245);
+        Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
+
         JPanel form = new JPanel(new GridLayout(3, 2));
+        form.setBackground(background);
+        form.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+
         form.add(new JLabel("Table No:"));
         tableField = new JTextField();
         form.add(tableField);
 
         form.add(new JLabel("Item:"));
-        itemField = new JTextField();
-        form.add(itemField);
+        JComboBox<String> itemBox = new JComboBox<>();
+        for (MenuItem menuItem : MenuDAO.fetchMenuItems()) {
+            itemBox.addItem(menuItem.getName());
+        }
+        form.add(itemBox);
 
         form.add(new JLabel("Quantity:"));
         qtyField = new JTextField();
         form.add(qtyField);
 
         JButton submit = new JButton("Add Order");
+        submit.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        submit.setBackground(new Color(64, 64, 64));
+        submit.setForeground(Color.WHITE);
+        submit.setFocusPainted(false);
+        submit.setPreferredSize(new Dimension(120, 35));
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setBackground(background);
+        buttonPanel.add(submit);
+        add(buttonPanel, BorderLayout.CENTER);
 
 
         outputArea = new JTextArea();
         outputArea.setEditable(false);
 
+
         add(form, BorderLayout.NORTH);
-        add(submit, BorderLayout.CENTER);
+       // add(submit, BorderLayout.CENTER);
         add(new JScrollPane(outputArea), BorderLayout.SOUTH);
 
         submit.addActionListener(e -> {
             try {
-                String item = itemField.getText().trim();
+                String item = itemBox.getSelectedItem().toString();
                 int qty = Integer.parseInt(qtyField.getText().trim());
                 int table = Integer.parseInt(tableField.getText().trim());
                 double price = 10.0;
@@ -88,15 +108,14 @@ public class OrderScreen extends JFrame {
 
                     outputArea.setText(String.join("\n", orders));
                     tableField.setText("");
-                    itemField.setText("");
                     qtyField.setText("");
+                    JOptionPane.showMessageDialog(this, "Sipariş başarıyla eklendi!");
 
                 } else {
                     JOptionPane.showMessageDialog(this, "Yetersiz stok: Yemekteki malzemeler eksik!");
                 }
 
                 tableField.setText("");
-                itemField.setText("");
                 qtyField.setText("");
 
             } catch (Exception ex) {

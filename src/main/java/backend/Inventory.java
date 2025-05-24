@@ -6,10 +6,7 @@ public class Inventory {
     private HashMap<String, Integer> stock = new HashMap<>();
 
     public Inventory() {
-        stock.put("Tomatoes", 50);
-        stock.put("Lettuce", 30);
-        stock.put("Cheese", 12);
-        stock.put("Onions", 20);
+
     }
 
     public boolean isAvailable(String item, int quantity) {
